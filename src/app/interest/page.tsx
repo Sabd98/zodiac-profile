@@ -113,7 +113,13 @@ export default function InterestPage() {
   }
 
   return (
-    <div className="min-h-screen p-4 bg-gradient-to-tr from-[#09141A] to-[#1F4247]">
+    <section
+      className="min-h-screen p-4"
+      style={{
+        background:
+          "radial-gradient(circle at left, #09141A, #0D1D23, #1F4247)",
+      }}
+    >
       <div className="max-w-md mx-auto">
         {/* Header dengan tombol back dan Save & Update */}
         <div className="flex items-center justify-between mb-6 pt-4">
@@ -131,9 +137,7 @@ export default function InterestPage() {
             onClick={handleSaveProfile}
             disabled={isSaving}
             className={`px-4 py-2 rounded-lg font-semibold ${
-              isSaving
-                ? "cursor-not-allowed"
-                : " text-white hover:bg-[#383f42]"
+              isSaving ? "cursor-not-allowed" : " text-white hover:bg-[#383f42]"
             }`}
           >
             {isSaving ? "Saving..." : "Save & Update"}
@@ -197,6 +201,6 @@ export default function InterestPage() {
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 }

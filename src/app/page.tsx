@@ -1,113 +1,162 @@
-import Image from 'next/image'
+//Home Page
+"use client";
+import ProfileCard from "@/components/profile/ProfileCard";
+import InterestCard from "@/components/profile/InterestCard";
+import { LogOut } from "lucide-react";
+import useProfileHook from "@/hooks/profileHook";
+import { useState } from "react";
+import { profileAPI } from "@/lib/api";
+import EditProfileForm from "@/components/profile/EditProfileForm";
+import HeaderCard from "@/components/profile/HeaderCard";
 
 export default function Home() {
-  return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/app/page.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+  const { error, loading, profile, router, setProfile, setError } =
+    useProfileHook();
+  const [isSaving, setIsSaving] = useState(false);
+  const [isEdit, setIsEdit] = useState(false);
+
+  //logout trigger
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    router.push("/login");
+  };
+
+  //handle send data request to API
+  const handleSaveProfile = async (data: any) => {
+    try {
+      setIsSaving(true);
+      setError(null);
+
+      // Format data sesuai API
+      const profileData = {
+        name: data.name,
+        birthday: data.birthday,
+        gender: data.gender,
+        height: data.height,
+        weight: data.weight,
+        interests: data.interests,
+        image: data.image, // Base64 string
+      };
+
+      // Gunakan API yang sesuai
+      const response = profile
+        ? await profileAPI.updateProfile(profileData)
+        : await profileAPI.createProfile(profileData);
+
+      console.log("Save profile response:", response.data);
+
+      // Perbarui state dengan data baru
+      setProfile({
+        ...(profile || {}),
+        ...profileData,
+        ...(response.data.data || {}),
+      });
+      setIsEdit((edited) => !edited);
+      // Redirect ke home setelah update berhasil
+      window.location.reload();
+    } catch (err: any) {
+      console.error("Save profile error:", err);
+      setError(err.response?.data?.message || "Failed to save profile");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  //Trigger edit button
+  const handleEdit = () => {
+    setIsEdit(!isEdit);
+  };
+
+  //isLoading
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-white">
+          <p>Loading profile...</p>
+          <div className="mt-4 w-12 h-12 border-t-2 border-[#545f64] border-solid rounded-full animate-spin mx-auto"></div>
         </div>
       </div>
+    );
+  }
 
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px] z-[-1]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
+  // Handle error jika terjadi kesalahan fetch
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-500 mb-4">Error: {error}</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <section className="min-h-screen bg-gradient-to-b p-4">
+      <div className="max-w-md mx-auto">
+        <nav className="flex items-center justify-between mb-6">
+          <button
+            onClick={handleLogout}
+            className="text-white flex items-center"
+          >
+            <LogOut />
+            <span>Logout</span>
+          </button>
+          <h1 className="text-xl font-bold text-white">@{profile?.username}</h1>
+          <div className="mr-16" />
+        </nav>
+        {/* Header Content */}
+        <HeaderCard
+          username={profile?.username}
+          name={profile?.name || "No name provided"}
+          birthday={profile?.birthday}
+          gender={profile?.gender}
+          horoscope={profile?.horoscope}
+          age={profile?.age}
+          zodiac={profile?.zodiac}
+          height={profile?.height}
+          weight={profile?.weight}
+          image={profile?.image}
+          interests={profile?.interests || []}
+        />
+        {/* ProfileComponent and EditProfileComponent, trigger with click edit icon */}
+        {isEdit ? (
+          <EditProfileForm
+            initialData={{
+              name: profile?.name || "",
+              birthday: profile?.birthday || "",
+              gender: profile?.gender || "",
+              horoscope: profile?.horoscope || "",
+              zodiac: profile?.zodiac || "",
+              height: profile?.height || 0,
+              weight: profile?.weight || 0,
+              interests: profile?.interests || [],
+            }}
+            onSubmit={handleSaveProfile}
+            isSaving={isSaving}
+            onEdit={handleEdit}
+          />
+        ) : (
+          <ProfileCard
+            username={profile?.username}
+            name={profile?.name || "No name provided"}
+            birthday={profile?.birthday}
+            gender={profile?.gender}
+            horoscope={profile?.horoscope}
+            age={profile?.age}
+            zodiac={profile?.zodiac}
+            height={profile?.height}
+            weight={profile?.weight}
+            image={profile?.image}
+            interests={profile?.interests || []}
+            isSaving={isSaving}
+            onEdit={handleEdit}
+          />
+        )}
+        <InterestCard
+          interests={profile?.interests || []}
+          onEdit={() => router.push("/interest")}
         />
       </div>
-
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Explore the Next.js 13 playground.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  )
+    </section>
+  );
 }

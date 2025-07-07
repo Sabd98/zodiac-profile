@@ -111,7 +111,7 @@ const RegisterForm = () => {
           type="submit"
           fullWidth
           disabled={loading}
-          className="bg-gradient-to-r from-[#62CDCB] to-[#4599DB]
+          className="submit-button-auth
             hover:shadow-[0_8px_20px_-4px_#4599DB] 
             transition duration-150 ease-in-out"
         >

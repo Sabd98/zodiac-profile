@@ -14,11 +14,17 @@ const InterestCard: React.FC<InterestCardProps> = ({
         <h2 className="text-lg font-semibold mb-4">Interests</h2>{" "}
         {onEdit && (
           <button
-            onClick={onEdit}
-            className=" text-white font-semibold hover:shadow-md"
-          >
-            <LucidePencilLine />
-          </button>
+          onClick={onEdit}
+          className="group relative p-2 rounded-full transition-all duration-300 "
+          aria-label="Edit profile"
+        >
+          <LucidePencilLine
+            className="text-white group-hover:text-yellow-400 transition-colors duration-300"
+            size={20}
+          />
+
+          <span className="absolute inset-0 rounded-full bg-white opacity-0 group-hover:opacity-10 group-hover:animate-ping transition-opacity duration-500"></span>
+        </button>
         )}
       </div>
 

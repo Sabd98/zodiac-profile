@@ -125,7 +125,7 @@ export default function InterestPage() {
         <div className="flex items-center justify-between mb-6 pt-4">
           <button
             onClick={() => router.back()}
-            className="text-white flex items-center"
+            className="text-white flex items-center hover:text-gray-500"
           >
             <ArrowLeft className="mr-1" size={20} />
             <span className="text-sm">Back</span>

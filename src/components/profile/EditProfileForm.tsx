@@ -133,7 +133,10 @@ const EditProfileForm: React.FC<EditProfileFormProps> = ({
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-bold">About</h2>
           <nav className="flex gap-2">
-            <button onClick={onEdit} className="text-white flex items-center">
+            <button
+              onClick={onEdit}
+              className="text-white hover:text-gray-500 flex items-center"
+            >
               <ArrowLeft className="mr-1" size={20} />
               <span className="text-sm">Back</span>
             </button>

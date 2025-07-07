@@ -91,12 +91,12 @@ export default function Home() {
   }
 
   return (
-    <section className="min-h-screen bg-gradient-to-b p-4">
+    <section className="min-h-screen p-4">
       <div className="max-w-md mx-auto">
         <nav className="flex items-center justify-between mb-6">
           <button
             onClick={handleLogout}
-            className="text-white flex items-center"
+            className="text-white flex items-center hover:text-red-500"
           >
             <LogOut />
             <span>Logout</span>
